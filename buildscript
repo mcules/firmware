@@ -141,6 +141,11 @@ prepare() {
 
     patch_target
 
+    # set the variant for this build
+    cp "./src/packages/fff/fff/variant-$(cat selected_variant).mk" "$target"/variant.mk
+    # force the reevaluation of this Makefile to make note of the new variant
+    touch ./src/packages/fff/fff/Makefile
+
     ## generate own feeds.conf
     #this local variable should be globally configure variable used in get_source and here
     local PACKAGEBASE=${PWD}/src/packages
@@ -358,6 +363,16 @@ loadCommunity()
     tpl_translate=$(awk -F= 'BEGIN{printf("sed")} /^.+$/{gsub("/", "\\/", $0); printf(" -es/\\${%s}/%s/g",$1,$2)}' selected_community)
 }
 
+loadVariant()
+{
+    echo "Working with build variant \"$(cat selected_variant)\""
+}
+
+setVariant()
+{
+    echo "$1" > selected_variant
+}
+
 setCommunity() {
     /bin/rm -rf selected_community
     /bin/ln -s "$1" selected_community
@@ -384,7 +399,7 @@ if [ "$(/usr/bin/id -u)" -eq 0 ]; then
 	exit 1
 fi
 
-if [ "$1" != "selectbsp" -a "$1" != "selectcommunity" ]; then
+if [ "$1" != "selectbsp" -a "$1" != "selectcommunity" -a "$1" != "selectvariant" ]; then
     if [ ! -h selected_bsp ]; then
         echo "Please select a Board-Support-Package using:"
         echo "$0 selectbsp"
@@ -395,8 +410,14 @@ if [ "$1" != "selectbsp" -a "$1" != "selectcommunity" ]; then
         echo "$0 selectcommunity"
         exit
     fi
+    if [ ! -f selected_variant ]; then
+        echo "Please select a build variant using:"
+        echo "$0 selectvariant"
+        exit
+    fi
     loadBSP
     loadCommunity
+    loadVariant
     echo
 fi
 
@@ -430,6 +451,22 @@ case "$1" in
                 echo "Could not find $2"
             else
                 setCommunity "$2"
+            fi
+        fi
+        ;;
+    "selectvariant")
+        if [ "$2" = "help" ] || [ "$2" = "" ]; then
+            echo "Select a build varaint:"
+            echo
+            echo "Usage: $0 $1 <name of variant>"
+            echo "available variants: "
+            /bin/ls src/packages/fff/fff/variant-*.mk | sed 's#.*/variant-\(.*\)\.mk#\1#g'
+            echo
+        else
+            if [ ! -f "src/packages/fff/fff/variant-$2.mk" ]; then
+                echo "Could not find variant $2"
+            else
+                setVariant $2
             fi
         fi
         ;;
@@ -505,6 +542,7 @@ case "$1" in
         echo "command:"
         echo "  selectcommunity <community-file>"
         echo "  selectbsp <bsp-file>"
+        echo "  selectvariant <name of variant>"
         echo "  prepare"
         echo "  config openwrt"
         echo "  build [fast|debug]"
