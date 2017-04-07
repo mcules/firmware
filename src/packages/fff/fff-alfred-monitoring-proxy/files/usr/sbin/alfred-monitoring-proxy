@@ -1,6 +1,8 @@
 #!/bin/ash
 
-api_url="https://monitoring.freifunk-franken.de/api/alfred"
+#api_url="https://monitoring.freifunk-franken.de/api/alfred"
+api_url="http://10.50.252.122/monitoring"
+
 fetch_ids="64"
 
 for fetch_id in $fetch_ids
