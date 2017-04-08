@@ -52,7 +52,7 @@ define Package/fff-layer3
     $(call Package/fff/base)
     TITLE+=(Layer 3 Gateway)
     DEPENDS+=+fff-dhcp \
-             +babeld \
+             +fff-babeld \
              +fff-openvpn \
              +arptables \
              +ebtables \
