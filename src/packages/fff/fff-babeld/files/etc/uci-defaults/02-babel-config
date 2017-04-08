@@ -1,0 +1,39 @@
+#!/bin/sh
+
+/bin/rm -f /etc/config/babeld
+
+cat > /etc/babeld.conf <<-__EOF__
+# For more information about this configuration file, refer to
+# babeld(8)
+
+#Defaultwerte für die Schnittstellen setzen:
+default wired true max-rtt-penalty 128
+
+#Falls einzelne Schnittstellen abweichend konfiguriert werden müssen:
+#interface eth0.4 wired true max-rtt-penalty 128
+#interface redgw wired true max-rtt-penalty 128
+#... einfach weiterführen für mehr Interfaces.
+
+export-table 10
+import-table 10
+
+# redistribute IPv4 default route into babel
+## redistribute local ip 0.0.0.0/0 le 0 metric 128
+
+# Babel refuses to redistribute routes with a protocol number of "boot";
+# this is standard practice, and means that you cannot easily
+# redistribute the default route installed by dhcp.  It is however
+# possible to redistribute such route by explicitly specifying "proto 3"
+# on the redistribute line.
+## redistribute ip 0.0.0.0/0 le 0 proto 3 metric 128
+
+# same but for IPv6
+## redistribute local ip ::/0 le 0 metric 128
+
+redistribute metric 128 #grad nicht ganz sicher ob so richtig
+redistribute local ip 10.0.0.0/8
+redistribute local deny
+
+#local-port 33123
+#local-port-readwrite 34567 #funktioniert anscheinend nicht!
+__EOF__
