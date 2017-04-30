@@ -67,7 +67,11 @@ define Package/fff-layer3
              +@PACKAGE_grev4 \
              +@PACKAGE_grev6 \
              +fff-alfred-monitoring-proxy \
-             +fff-batman-adv-server
+             +fff-batman-adv-server \
+             +@FASTD_ENABLE_METHOD_NULL \
+             +@FASTD_ENABLE_CIPHER_NULL \
+             +@FASTD_WITH_STATUS_SOCKET \
+             +fastd
     VARIANT:=layer3
 endef
 
