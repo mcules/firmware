@@ -41,7 +41,7 @@ define Package/fff-node
     $(call Package/fff/base)
     TITLE+=(Home node)
     DEPENDS+=+fff-fastd \
-             +fff-vpn-select \
+             +fff-vpn-select
     VARIANT:=homenode
 endef
 
