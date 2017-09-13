@@ -138,6 +138,11 @@ prepare() {
 
     patch_target
 
+    # set the variant for this build
+    cp "./src/packages/fff/fff/variant-$(cat selected_variant).mk" "$target"/variant.mk
+    # force the reevaluation of this Makefile to make note of the new variant
+    touch ./src/packages/fff/fff/Makefile
+
     ## generate own feeds.conf
     #this local variable should be globally configure variable used in get_source and here
     local PACKAGEBASE=${PWD}/src/packages
@@ -181,11 +186,6 @@ prebuild() {
 
     cp -r ./bsp/default/root_file_system/* "$target"/files/
     cp ./bsp/"$machine"/.config "$target"/.config
-
-    # set the variant for this build
-    cp "./src/packages/fff/fff/variant-$(cat selected_variant).mk" "$target"/variant.mk
-    # force the reevaluation of this Makefile to make note of the new variant
-    touch ./src/packages/fff/fff/Makefile
 
     while IFS= read -r -d '' template
     do
