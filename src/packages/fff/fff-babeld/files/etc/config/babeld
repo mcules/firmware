@@ -20,3 +20,4 @@ config filter
 	option type 'redistribute'
 	option local 'true'
 	option action 'deny'
+
