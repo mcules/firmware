@@ -1,0 +1,129 @@
+#!/bin/sh
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+BOARD="$(uci get board.model.name)"
+. /etc/network.$BOARD
+
+#load uci functions
+. /lib/functions.sh
+
+#set hostname
+if uci get gateway.@gateway[0].name; then
+    uci set system.@system[0].hostname=$(uci get gateway.@gateway[0].name)
+else
+    echo "WARNING: No gateway name set!"
+fi
+
+#set ip
+if uci get gateway.@gateway[0].ip && uci get gateway.@gateway[0].netmask; then
+    uci set network.mesh.ipaddr=$(uci get gateway.@gateway[0].ip)
+    uci set network.mesh.netmask=$(uci get gateway.@gateway[0].netmask)
+else
+    echo "WARNING: No ip and/or netmask set!"
+fi
+
+
+#set dhcp
+uci del dhcp.mesh
+if uci get gateway.@dhcp[0].start && uci get gateway.@dhcp[0].limit; then
+    uci set dhcp.mesh=dhcp
+    uci set dhcp.mesh.interface=mesh
+    uci set dhcp.mesh.start=$(uci get gateway.@dhcp[0].start)
+    uci set dhcp.mesh.limit=$(uci get gateway.@dhcp[0].limit)
+    uci set dhcp.mesh.leasetime='12h'
+else
+    echo "WARNING: No DHCP range start and/or limit set!"
+fi
+
+
+#set dns-servers
+uci delete dhcp.@dnsmasq[0].server
+if uci get gateway.@dns[0].server; then
+    for f in $(uci get gateway.@dns[0].server); do
+        uci add_list dhcp.@dnsmasq[0].server=$f
+        uci add_list dhcp.@dnsmasq[0].server="/in-addr.arpa/$f"
+        uci add_list dhcp.@dnsmasq[0].server="/ip6.arpa/$f"
+    done
+else
+    echo "WARNING: No DNS servers set!"
+fi
+
+
+
+## BABEL CONFIG
+# remove peers missing in gateway config
+remove_peer() {
+    local name="$1"
+    if ! echo $name | grep cfg > /dev/null; then # do not delete default interface
+        if ! uci get gateway.$name; then
+            # remove interface
+            uci del network.$name
+            # remove babel interface
+            uci del babeld.$name
+        fi
+    fi
+}
+
+config_load babeld
+config_foreach remove_peer interface
+
+
+#add new peers
+add_peer() {
+    local name="$1"
+    local vlan
+    local type
+
+    if echo $name | grep cfg > /dev/null; then
+        echo "ERROR: Invalid name for peer!"
+        return
+    fi
+
+    if uci get gateway.$name.vlan; then
+        vlan=$(uci get gateway.$name.vlan)
+    else
+        echo "ERROR: No VLAN set for peer $name!"
+        return
+    fi
+
+    if uci get gateway.$name.type; then
+        type=$(uci get gateway.$name.type)
+    else
+        type=wired
+    fi
+
+    # add vlan
+    # VLAN's don't get removed if peer is removed!
+    uci set network.eth0_$vlan=switch_vlan
+    uci set network.eth0_$vlan.device=$(swconfig list | awk '{ print $4 }')
+    uci set network.eth0_$vlan.vlan=$vlan
+    uci set network.eth0_$vlan.ports=$BABEL_PORTS
+
+    # add interface
+    uci set network.$name=interface
+    uci set network.$name.proto=static
+    uci set network.$name.ifname=eth0.$vlan
+    uci set network.$name.ipaddr=$(uci get gateway.@gateway[0].mesh_ip)
+
+    # add babel interface
+    uci set babeld.$name=interface
+    uci set babeld.$name.ifname=$name
+    uci set babeld.$name.type=$type
+}
+
+config_load gateway
+config_foreach add_peer peer
+
+
+
+uci commit
+
+exit 0
