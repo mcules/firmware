@@ -16,7 +16,7 @@ define Package/fff-gateway
     DEPENDS:=+fff-network
 endef
 
-define Package/fff-network/description
+define Package/fff-gateway/description
     This package configures the gateway
 endef
 
@@ -32,9 +32,9 @@ define Build/Compile
 	# nothing
 endef
 
-define Package/fff-network/install
+define Package/fff-gateway/install
 	$(CP) ./files/* $(1)/
 	test -d ./$(BOARD) && $(CP) ./$(BOARD)/* $(1)/etc/
 endef
 
-$(eval $(call BuildPackage,fff-network))
+$(eval $(call BuildPackage,fff-gateway))
