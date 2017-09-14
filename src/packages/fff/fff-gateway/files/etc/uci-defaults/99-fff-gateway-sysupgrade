@@ -1,7 +1,0 @@
-#!/bin/sh
-# Copyright 2017 Tim Niemeyer
-# License GPLv3
-
-cat > /etc/sysupgrade.conf <<-__EOF__
-/etc/config/gateway
-__EOF__
