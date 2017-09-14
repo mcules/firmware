@@ -105,7 +105,7 @@ add_peer() {
     uci set network.eth0_$vlan=switch_vlan
     uci set network.eth0_$vlan.device=$(swconfig list | awk '{ print $4 }')
     uci set network.eth0_$vlan.vlan=$vlan
-    uci set network.eth0_$vlan.ports=$BABEL_PORTS
+    uci set network.eth0_$vlan.ports="$BABEL_PORTS"
 
     # add interface
     uci set network.$name=interface
