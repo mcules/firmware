@@ -34,7 +34,7 @@ endef
 
 define Package/fff-gateway/install
 	$(CP) ./files/* $(1)/
-	test -d ./$(BOARD) && $(CP) ./$(BOARD)/* $(1)/etc/
+	test -d ./$(BOARD) && mkdir -p $(1)/etc && $(CP) ./$(BOARD)/* $(1)/etc/
 endef
 
 $(eval $(call BuildPackage,fff-gateway))
