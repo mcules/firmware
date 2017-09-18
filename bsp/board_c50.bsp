@@ -1,0 +1,7 @@
+machine=c50
+chipset=ramips
+target=$builddir/$machine
+
+images=(
+        "lede-ramips-mt7620-ArcherC50-squashfs-factory-sysupgrade.bin"
+       )
