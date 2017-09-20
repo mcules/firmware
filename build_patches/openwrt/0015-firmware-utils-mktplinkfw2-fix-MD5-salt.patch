@@ -1,0 +1,68 @@
+From 2f7382a3b9ae90e67980f0baedeb7f3109cfc0a6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Rafa=C5=82=20Mi=C5=82ecki?= <rafal@milecki.pl>
+Date: Sun, 2 Jul 2017 17:06:58 +0200
+Subject: [PATCH 3/3] firmware-utils: mktplinkfw2: fix MD5 salt
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+LEDE supports few devices using TP-Link firmware format (V2 or V3):
+ArcherC20i, ArcherC50, ArcherMR200, TDW8970, TDW8980, TL-WR840N v4,
+TL-WR841N v13 and VR200v
+
+Testing mktplinkfw2 tool with official (vendor generated) firmware files
+for above devices has shown an error when comparing calculated and
+included MD5 sum, e.g.:
+> mktplinkfw2 -i Archer_C20iv1_0.9.1_3.2_up_boot\(170221\)_2017-02-21_17.14.03.bin | grep -A 1 MD5Sum1
+Header MD5Sum1         : 22 5a cb 92 10 d2 95 7b df 62 9a f8 62 17 37 10 (*ERROR*)
+          --> expected : ad 19 11 d1 78 98 a7 42 5f 2e 64 da 8a 34 ec cb
+
+This problem has been verified to occur with:
+Archer_C20iv1_0.9.1_3.2_up_boot(170221)_2017-02-21_17.14.03.bin
+Archer MR200v1_0.9.1_1.1_up_boot_v004a.0 Build 160905 Rel.60037n.bin
+TD-W8970v3_0.9.1_2.0_up_boot(160816)_2016-08-16_10.40.57.bin
+TD-W8980v1_0.6.0_1.8_up_boot(150514)_2015-05-14_11.16.43.bin
+Archer_VR200vv2_0.2.0_0.8.0_up_boot(161202)_2016-12-05_14.39.06.bin
+
+For some images, e.g.:
+Archer_C50v3_EU_0.9.1_0.3_up_boot[170417-rel52298].bin
+TL-WR840Nv4_EU_0.9.1_4.16_up_boot[170421-rel70692].bin
+TL-WR841Nv13_0.9.1_3.16_up_boot(161012).bin
+mktplinkfw2 calculates zero MD5 so these has to be fixed separately:
+> mktplinkfw2 -i TL-WR841Nv13_0.9.1_3.16_up_boot\(161012\).bin | grep -A 1 MD5Sum1
+Header MD5Sum1         : 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 (*ERROR*)
+          --> expected : 6f 1d 9b 57 5d 42 14 6d bf a2 03 9d 46 7d 55 55
+
+It's most likely that MD5 salt used in mktplinkfw2 has been always wrong
+(and it's not a matter of e.g. a vendor change). Update it to fix MD5
+calculation.
+
+This has been also verified to calculate MD5 correctly for other (not
+yet supported) devices, e.g.:
+Archer_C3150v2_0.1.0_0.9.1_up_boot(160812)_2016-08-12_10.52.54.bin
+Archer_C3200v1_0.9.1_0.1_up_boot(160704)_2016-07-04_15.48.28.bin
+
+Signed-off-by: Rafał Miłecki <rafal@milecki.pl>
+Acked-by: Mathias Kresin <dev@kresin.me>
+---
+ tools/firmware-utils/src/mktplinkfw2.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tools/firmware-utils/src/mktplinkfw2.c b/tools/firmware-utils/src/mktplinkfw2.c
+index 4efe06acf3..f6436c95b3 100644
+--- a/tools/firmware-utils/src/mktplinkfw2.c
++++ b/tools/firmware-utils/src/mktplinkfw2.c
+@@ -135,8 +135,8 @@ char md5salt_normal[MD5SUM_LEN] = {
+ };
+ 
+ char md5salt_boot[MD5SUM_LEN] = {
+-	0x8c, 0xef, 0x33, 0x5b, 0xd5, 0xc5, 0xce, 0xfa,
+-	0xa7, 0x9c, 0x28, 0xda, 0xb2, 0xe9, 0x0f, 0x42,
++	0x8c, 0xef, 0x33, 0x5f, 0xd5, 0xc5, 0xce, 0xfa,
++	0xac, 0x9c, 0x28, 0xda, 0xb2, 0xe9, 0x0f, 0x42,
+ };
+ 
+ static struct flash_layout layouts[] = {
+-- 
+2.11.0 (Apple Git-81)
+
