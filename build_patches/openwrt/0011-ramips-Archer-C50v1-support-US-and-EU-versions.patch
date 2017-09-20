@@ -1,0 +1,52 @@
+From ce7f6ca8904faa45bea4820b1360ed7a05057f60 Mon Sep 17 00:00:00 2001
+From: Thibaut VARENE <hacks@slashdirt.org>
+Date: Fri, 28 Jul 2017 13:00:54 +0200
+Subject: [PATCH 4/4] ramips: Archer C50v1: support US and EU versions
+
+For the Archer C50v1, the EU and US versions are differentiated by their
+respective HW additional version (0x0 for US, 0x2 for EU).
+
+The stock web interface checks this field before flashing, making it
+impossible to flash the current (US) factory image on EU hardware.
+
+However the bootloader does not check this field, making it possible to use
+a single sysupgrade image for both hardware.
+
+This patch adds the necessary build bits to generate both EU and US factory
+images, and renames the target as "Archer C50v1" since there are as of now
+3 different versions of Archer C50 (all with different CPUs).
+
+Signed-off-by: Thibaut VARENE <hacks@slashdirt.org>
+---
+ target/linux/ramips/image/mt7620.mk | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/target/linux/ramips/image/mt7620.mk b/target/linux/ramips/image/mt7620.mk
+index dd75f5a504..64d11a5b0a 100644
+--- a/target/linux/ramips/image/mt7620.mk
++++ b/target/linux/ramips/image/mt7620.mk
+@@ -46,15 +46,17 @@ define Device/ArcherC20i
+ endef
+ TARGET_DEVICES += ArcherC20i
+ 
+-define Device/ArcherC50
++define Device/ArcherC50v1
+   $(Device/Archer)
+   DTS := ArcherC50
+   SUPPORTED_DEVICES := c50
+   TPLINK_BOARD_ID := ArcherC50
+-  IMAGES += factory.bin
+-  DEVICE_TITLE := TP-Link ArcherC50
++  IMAGES += factory-us.bin factory-eu.bin
++  IMAGE/factory-us.bin := tplink-v2-image -w 0
++  IMAGE/factory-eu.bin := tplink-v2-image -w 2
++  DEVICE_TITLE := TP-Link ArcherC50v1
+ endef
+-TARGET_DEVICES += ArcherC50
++TARGET_DEVICES += ArcherC50v1
+ 
+ define Device/ArcherMR200
+   $(Device/Archer)
+-- 
+2.11.0 (Apple Git-81)
+

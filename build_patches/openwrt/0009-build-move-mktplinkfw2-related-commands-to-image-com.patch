@@ -1,0 +1,166 @@
+From 91dbedeb5a9795cf7803e22a29b3d2a3b0bebf85 Mon Sep 17 00:00:00 2001
+From: Piotr Dymacz <pepe2k@gmail.com>
+Date: Fri, 23 Jun 2017 23:07:10 +0200
+Subject: [PATCH 2/4] build: move mktplinkfw2 related commands to
+ image-commands.mk
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+There are already two targets (lantiq, ramips) which use mktplinkfw2
+tool for creating images. This de-duplicates code, introduces two new
+build commands: tplink-v2-header, tplink-v2-image and makes use of
+them in place of old, (sub)target specific ones.
+
+Signed-off-by: Piotr Dymacz <pepe2k@gmail.com>
+[Rebased on 97ebdf9]
+Signed-off-by: Fabian Bläse <fabian@blaese.de>
+---
+ include/image-commands.mk            | 14 ++++++++++++++
+ target/linux/lantiq/image/tp-link.mk | 25 ++++++++-----------------
+ target/linux/ramips/image/mt7620.mk  | 24 ++++++++++++------------
+ 3 files changed, 34 insertions(+), 29 deletions(-)
+
+diff --git a/include/image-commands.mk b/include/image-commands.mk
+index 04fa853fbb..90fe5fc242 100644
+--- a/include/image-commands.mk
++++ b/include/image-commands.mk
+@@ -173,6 +173,20 @@ define Build/sysupgrade-tar
+ 		$@
+ endef
+ 
++define Build/tplink-v2-header
++	$(STAGING_DIR_HOST)/bin/mktplinkfw2 \
++		-c -V "ver. 2.0" -B $(TPLINK_BOARD_ID) $(1) -k $@ -o $@.new
++	@mv $@.new $@
++endef
++
++define Build/tplink-v2-image
++	$(STAGING_DIR_HOST)/bin/mktplinkfw2 \
++		-a 0x4 -j -V "ver. 2.0" -B $(TPLINK_BOARD_ID) $(1) \
++		-k $(IMAGE_KERNEL) -r $(IMAGE_ROOTFS) -o $@.new
++	cat $@.new >> $@
++	rm -rf $@.new
++endef
++
+ json_quote=$(subst ','\'',$(subst ",\",$(1)))
+ #")')
+ metadata_devices=$(if $(1),$(subst "$(space)","$(comma)",$(strip $(foreach v,$(1),"$(call json_quote,$(v))"))))
+diff --git a/target/linux/lantiq/image/tp-link.mk b/target/linux/lantiq/image/tp-link.mk
+index 49c4bc10e1..976184175a 100644
+--- a/target/linux/lantiq/image/tp-link.mk
++++ b/target/linux/lantiq/image/tp-link.mk
+@@ -1,27 +1,18 @@
+-define Build/tplink-fw
+-	mktplinkfw2 -c -B $(BOARD_ID) -s \
+-		-k $@ -o $@.new
+-	mv $@.new $@
+-endef
+-
+-define Build/mktplinkfw2
+-	mktplinkfw2 -B $(BOARD_ID) -s -a 0x4 -j \
+-		-k $(IMAGE_KERNEL) -r $(IMAGE_ROOTFS) \
+-		-o $@
+-endef
+-DEVICE_VARS += BOARD_ID
++DEVICE_VARS += TPLINK_BOARD_ID
+ 
+ define Device/lantiqTpLink
+   KERNEL := kernel-bin | append-dtb | lzma
+-  KERNEL_INITRAMFS := kernel-bin | append-dtb | lzma | tplink-fw
++  KERNEL_INITRAMFS := kernel-bin | append-dtb | lzma | \
++	tplink-v2-header -s -V "ver. 1.0"
+   IMAGES := sysupgrade.bin
+-  IMAGE/sysupgrade.bin := mktplinkfw2 | append-metadata | check-size $$$$(IMAGE_SIZE)
++  IMAGE/sysupgrade.bin := tplink-v2-image -s -V "ver. 1.0" | \
++	append-metadata | check-size $$$$(IMAGE_SIZE)
+ endef
+ 
+ define Device/TDW8970
+   $(Device/lantiqTpLink)
+   DEVICE_PROFILE := TDW8970
+-  BOARD_ID := TD-W8970v1
++  TPLINK_BOARD_ID := TD-W8970v1
+   IMAGE_SIZE := 7680k
+   DEVICE_TITLE := TP-LINK TD-W8970
+   DEVICE_PACKAGES:= kmod-ath9k wpad-mini kmod-usb-dwc2 kmod-usb-ledtrig-usbport
+@@ -30,7 +21,7 @@ endef
+ define Device/TDW8980
+   $(Device/lantiqTpLink)
+   DEVICE_PROFILE := TDW8980
+-  BOARD_ID := TD-W8980v1
++  TPLINK_BOARD_ID := TD-W8980v1
+   IMAGE_SIZE := 7680k
+   DEVICE_TITLE := TP-LINK TD-W8980
+   DEVICE_PACKAGES:= kmod-ath9k kmod-owl-loader wpad-mini kmod-usb-dwc2 kmod-usb-ledtrig-usbport
+@@ -39,7 +30,7 @@ endef
+ define Device/VR200v
+   $(Device/lantiqTpLink)
+   DEVICE_PROFILE := VR200v
+-  BOARD_ID := ArcherVR200V
++  TPLINK_BOARD_ID := ArcherVR200V
+   IMAGE_SIZE := 15808k
+   DEVICE_TITLE := TP-LINK Archer VR200v
+   DEVICE_PACKAGES:= kmod-usb-dwc2 kmod-usb-ledtrig-usbport
+diff --git a/target/linux/ramips/image/mt7620.mk b/target/linux/ramips/image/mt7620.mk
+index c2c0ae271d..bb79acb894 100644
+--- a/target/linux/ramips/image/mt7620.mk
++++ b/target/linux/ramips/image/mt7620.mk
+@@ -2,10 +2,7 @@
+ # MT7620A Profiles
+ #
+ 
+-define Build/tplink-header
+-	$(STAGING_DIR_HOST)/bin/mktplinkfw2 -a 0x4 -V "ver. 2.0" -B $(1) \
+-		-o $@.new -k $@ -r $(IMAGE_ROOTFS) && mv $@.new $@
+-endef
++DEVICE_VARS += TPLINK_BOARD_ID
+ 
+ define Build/pad-kernel-ex2700
+ 	cp $@ $@.tmp && dd if=/dev/zero bs=64 count=1 >> $@.tmp \
+@@ -35,10 +32,11 @@ endef
+ define Device/ArcherC20i
+   DTS := ArcherC20i
+   SUPPORTED_DEVICES := c20i
++  TPLINK_BOARD_ID := ArcherC20i
+   KERNEL := $(KERNEL_DTB)
+-  KERNEL_INITRAMFS := $(KERNEL_DTB) | tplink-header ArcherC20i -c
+-  IMAGE/factory.bin := append-kernel | tplink-header ArcherC20i -j
+-  IMAGE/sysupgrade.bin := append-kernel | tplink-header ArcherC20i -j -s | append-metadata
++  KERNEL_INITRAMFS := $(KERNEL_DTB) | tplink-v2-header
++  IMAGE/factory.bin := tplink-v2-image
++  IMAGE/sysupgrade.bin := tplink-v2-image -s | append-metadata
+   IMAGES += factory.bin
+   DEVICE_TITLE := TP-Link ArcherC20i
+ endef
+@@ -47,10 +45,11 @@ TARGET_DEVICES += ArcherC20i
+ define Device/ArcherC50
+   DTS := ArcherC50
+   SUPPORTED_DEVICES := c50
++  TPLINK_BOARD_ID := ArcherC50
+   KERNEL := $(KERNEL_DTB)
+-  KERNEL_INITRAMFS := $(KERNEL_DTB) | tplink-header ArcherC50 -c
+-  IMAGE/factory.bin := append-kernel | tplink-header ArcherC50 -j
+-  IMAGE/sysupgrade.bin := append-kernel | tplink-header ArcherC50 -j -s | append-metadata
++  KERNEL_INITRAMFS := $(KERNEL_DTB) | tplink-v2-header
++  IMAGE/factory.bin := tplink-v2-image
++  IMAGE/sysupgrade.bin := tplink-v2-image -s | append-metadata
+   IMAGES += factory.bin
+   DEVICE_TITLE := TP-Link ArcherC50
+ endef
+@@ -59,9 +58,10 @@ TARGET_DEVICES += ArcherC50
+ define Device/ArcherMR200
+   DTS := ArcherMR200
+   SUPPORTED_DEVICES := mr200
++  TPLINK_BOARD_ID := ArcherMR200
+   KERNEL := $(KERNEL_DTB)
+-  KERNEL_INITRAMFS := $(KERNEL_DTB) | tplink-header ArcherMR200 -c
+-  IMAGE/sysupgrade.bin := append-kernel | tplink-header ArcherMR200 -j -s | append-metadata
++  KERNEL_INITRAMFS := $(KERNEL_DTB) | tplink-v2-header
++  IMAGE/sysupgrade.bin := tplink-v2-image -s | append-metadata
+   DEVICE_PACKAGES := kmod-usb2 kmod-usb-net kmod-usb-net-rndis kmod-usb-serial kmod-usb-serial-option adb
+   DEVICE_TITLE := TP-Link ArcherMR200
+ endef
+-- 
+2.11.0 (Apple Git-81)
+
