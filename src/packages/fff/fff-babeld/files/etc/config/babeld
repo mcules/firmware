@@ -5,7 +5,6 @@ config general
 
 config interface
 	option type 'wired'
-	option max_rtt_penalty '128'
 
 config filter
 	option type 'redistribute'
