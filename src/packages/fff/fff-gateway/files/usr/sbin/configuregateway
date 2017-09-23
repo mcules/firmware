@@ -23,9 +23,8 @@ else
 fi
 
 #set ip
-if uci get gateway.@gateway[0].ip && uci get gateway.@gateway[0].netmask; then
+if uci get gateway.@gateway[0].ip; then
     uci set network.mesh.ipaddr=$(uci get gateway.@gateway[0].ip)
-    uci set network.mesh.netmask=$(uci get gateway.@gateway[0].netmask)
     uci set network.mesh.ip4table='fff'
     uci set network.mesh.ip6table='fff'
 else
