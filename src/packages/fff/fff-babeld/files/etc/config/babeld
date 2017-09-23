@@ -9,10 +9,6 @@ config interface
 
 config filter
 	option type 'redistribute'
-	option action 'metric 128'
-
-config filter
-	option type 'redistribute'
 	option local 'true'
 	option ip '10.0.0.0/8'
 
@@ -21,3 +17,6 @@ config filter
 	option local 'true'
 	option action 'deny'
 
+config filter
+	option type 'redistribute'
+	option ip '10.0.0.0/8'
