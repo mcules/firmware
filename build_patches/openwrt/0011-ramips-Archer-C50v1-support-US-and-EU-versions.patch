@@ -1,7 +1,7 @@
-From ce7f6ca8904faa45bea4820b1360ed7a05057f60 Mon Sep 17 00:00:00 2001
+From cfa1a9466db691915960be89e40f3c8335b9ea4f Mon Sep 17 00:00:00 2001
 From: Thibaut VARENE <hacks@slashdirt.org>
 Date: Fri, 28 Jul 2017 13:00:54 +0200
-Subject: [PATCH 4/4] ramips: Archer C50v1: support US and EU versions
+Subject: [PATCH 3/3] ramips: Archer C50v1: support US and EU versions
 
 For the Archer C50v1, the EU and US versions are differentiated by their
 respective HW additional version (0x0 for US, 0x2 for EU).
@@ -48,5 +48,5 @@ index dd75f5a504..64d11a5b0a 100644
  define Device/ArcherMR200
    $(Device/Archer)
 -- 
-2.11.0 (Apple Git-81)
+2.14.2
 

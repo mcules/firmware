@@ -1,14 +1,14 @@
-From 71119a9ea2eeb56c1c981f10b89d0351d6799636 Mon Sep 17 00:00:00 2001
+From 16cbb38ac1f84d60b9901f9d6827a498a1cbba46 Mon Sep 17 00:00:00 2001
 From: Piotr Dymacz <pepe2k@gmail.com>
 Date: Fri, 23 Jun 2017 23:20:53 +0200
-Subject: [PATCH 3/4] ramips: image: simplify TP-Link Archer devices
+Subject: [PATCH 2/3] ramips: image: simplify TP-Link Archer devices
  definitions
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 
 Signed-off-by: Piotr Dymacz <pepe2k@gmail.com>
-[Rebased on 97ebdf9]
+[Rebased on 8ad1b09]
 Signed-off-by: Fabian Bläse <fabian@blaese.de>
 ---
  target/linux/ramips/image/mt7620.mk | 21 ++++++++++-----------
@@ -69,5 +69,5 @@ index bb79acb894..dd75f5a504 100644
    DEVICE_TITLE := TP-Link ArcherMR200
  endef
 -- 
-2.11.0 (Apple Git-81)
+2.14.2
 
