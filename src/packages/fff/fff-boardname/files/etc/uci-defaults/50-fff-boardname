@@ -64,6 +64,9 @@ case "$BOARD" in
     archer-c7)
         BOARD=archer-c7-v2
         ;;
+    c50)
+        BOARD=archer-c50-v1
+        ;;
 esac
 
 uci set board.model.name=$BOARD

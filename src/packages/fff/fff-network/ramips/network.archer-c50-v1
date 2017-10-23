@@ -1,0 +1,9 @@
+PORTORDER="5 3 4 1 2"
+
+WANDEV=eth0
+SWITCHDEV=eth0
+CLIENT_PORTS="6t 1 2"
+WAN_PORTS="6t 0"
+BATMAN_PORTS="6t 3 4"
+
+ROUTERMAC=$(cat /sys/class/net/eth0/address)

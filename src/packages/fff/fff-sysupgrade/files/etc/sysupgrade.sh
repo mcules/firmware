@@ -17,9 +17,11 @@ BOARD=$(uci get board.model.name)
 #decide SOC
 case $BOARD in
     tl-wdr4900-v1 )
-        SOC="mpc85xx" ;;
+        SOC="mpc85xx-g" ;;
+    archer-c50-v1 )
+        SOC="ramips-mt7620" ;;
     * )
-        SOC="ar71xx" ;;
+        SOC="ar71xx-g" ;;
 esac
 echo ""
 echo "Hardware: $BOARD"
@@ -30,6 +32,8 @@ case $BOARD in
         BOARD="cpe210-220" ;;
     cpe510 )
         BOARD="cpe510-520" ;;
+    archer-c50-v1 )
+        BOARD="ArcherC50v1" ;;
 esac
 
 wget "${UPGRADE_PATH}/release.nfo"
@@ -71,7 +75,7 @@ if [ "$FIRMWARE_COMMUNITY" = "franken" ]; then
     FIRMWARE_COMMUNITY="fff"
 fi
 
-FILE="${FIRMWARE_COMMUNITY}-${VERSION}-${SOC}-g-${BOARD}-squashfs-sysupgrade.bin"
+FILE="${FIRMWARE_COMMUNITY}-${VERSION}-${SOC}-${BOARD}-squashfs-sysupgrade.bin"
 echo "Downloading $FILE"
 echo ""
 wget "${UPGRADE_PATH}/${FILE}"

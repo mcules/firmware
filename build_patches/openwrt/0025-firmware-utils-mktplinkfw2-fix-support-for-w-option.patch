@@ -1,0 +1,34 @@
+From 5ead985c0d47952f0d70783ad5222d85a9381441 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Rafa=C5=82=20Mi=C5=82ecki?= <rafal@milecki.pl>
+Date: Sun, 2 Jul 2017 22:28:24 +0200
+Subject: [PATCH 5/6] firmware-utils: mktplinkfw2: fix support for -w option
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This fixes copy & paste typo when reading -w argument.
+
+Fixes: 4b35e174caa5b ("firmware-utils: mktplinkfw2: support additional hardware version")
+Signed-off-by: Rafał Miłecki <rafal@milecki.pl>
+[Rebased on 8ad1b09 + C25 + 1043v5]
+Signed-off-by: Adrian Schmutzler <freifunk@adrianschmutzler.de>
+---
+ tools/firmware-utils/src/mktplinkfw2.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/firmware-utils/src/mktplinkfw2.c b/tools/firmware-utils/src/mktplinkfw2.c
+index b6dd670..4efe06a 100644
+--- a/tools/firmware-utils/src/mktplinkfw2.c
++++ b/tools/firmware-utils/src/mktplinkfw2.c
+@@ -412,7 +412,7 @@ static int check_options(void)
+ 			hw_rev = 1;
+ 
+ 		if (opt_hw_ver_add)
+-			hw_ver_add = strtoul(opt_hw_rev, NULL, 0);
++			hw_ver_add = strtoul(opt_hw_ver_add, NULL, 0);
+ 		else
+ 			hw_ver_add = 0;
+ 	}
+-- 
+2.7.4
+
