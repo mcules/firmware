@@ -22,13 +22,11 @@ define Package/fff/base
              +fff-web \
              +fff-uradvd \
              +fff-batman-adv \
-             +fff-firewall \
              +fff-support \
              +fff-network \
              +fff-sysupgrade \
              +fff-wireless \
              +fff-timeserver \
-             +fff-vpn-select \
              +simple-tc \
              +fff-hoods
 endef
@@ -41,6 +39,7 @@ define Package/fff-node
     $(call Package/fff/base)
     TITLE+=(Home node)
     DEPENDS+=+fff-fastd \
+             +fff-firewall \
              +fff-vpn-select
     VARIANT:=homenode
 endef
