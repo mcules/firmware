@@ -66,7 +66,9 @@ define Package/fff-layer3
              +@PACKAGE_grev4 \
              +@PACKAGE_grev6 \
              +fff-alfred-monitoring-proxy \
-             +fff-batman-adv-server
+             +fff-batman-adv-server \
+             +iperf3 \
+             +tcpdump
     VARIANT:=layer3
 endef
 
