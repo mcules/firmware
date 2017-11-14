@@ -27,8 +27,7 @@ define Package/fff/base
              +fff-sysupgrade \
              +fff-wireless \
              +fff-timeserver \
-             +simple-tc \
-             +fff-hoods
+             +simple-tc
 endef
 
 define Package/fff/base/description
@@ -40,7 +39,8 @@ define Package/fff-node
     TITLE+=(Home node)
     DEPENDS+=+fff-fastd \
              +fff-firewall \
-             +fff-vpn-select
+             +fff-vpn-select \
+             +fff-hoods
     VARIANT:=homenode
 endef
 
