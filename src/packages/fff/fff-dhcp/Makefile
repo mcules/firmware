@@ -11,7 +11,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/fff-dhcp
     SECTION:=base
     CATEGORY:=Freifunk
-    TITLE:=Freifunk-Franken batman-adv-legacy-server
+    TITLE:=Freifunk-Franken dhcp
     URL:=http://www.freifunk-franken.de
     DEPENDS:=+dnsmasq
 endef
