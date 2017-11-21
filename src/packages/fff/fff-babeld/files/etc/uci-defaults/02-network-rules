@@ -18,7 +18,7 @@ uci batch <<EOF
   set network.@rule[2].priority='31'
   add network rule6
   set network.@rule6[0]=rule6
-  set network.@rule6[0].dest='fd43:5602:29bd::/48'
+  set network.@rule6[0].src='fd43:5602:29bd::/48'
   set network.@rule6[0].lookup='10'
   set network.@rule6[0].priority='20'
   add network rule6
