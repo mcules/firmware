@@ -178,7 +178,7 @@ if [ -s "$hoodfilecopy" ]; then
     json_select ".."
     json_select ".."
 
-    if [ -n "$lat" ] && [ -n "$lon"]; then
+    if [ -n "$lat" ] && [ -n "$lon" ]; then
         uci -q set "fff.system.latitude=$lat"
         uci -q set "fff.system.longitude=$lon"
     fi
