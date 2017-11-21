@@ -104,12 +104,6 @@ if [ -s "$hoodfilecopy" ]; then
         else
             echo "Address already set."
         fi
-        if ! ( ip -6 route show dev br-mesh | grep -q "fc00::" ) ; then
-            ip -6 route add fc00::/7 via fe80::1 dev br-mesh
-            echo "Set ULA route to br-mesh."
-        else
-            echo "Route already set."
-        fi
     fi
 
     # WIFI
