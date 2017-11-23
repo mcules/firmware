@@ -41,6 +41,12 @@ else
     echo "WARNING: No ip and/or netmask set!"
 fi
 
+#set ip6addr
+if uci get gateway.@gateway[0].ip6addr; then
+    uci add_list network.mesh.ip6addr=$(uci get gateway.@gateway[0].ip6addr)
+else
+    echo "WARNING: No ip6addr set!"
+fi
 
 #set dhcp
 uci del dhcp.mesh
