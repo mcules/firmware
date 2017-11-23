@@ -246,8 +246,19 @@ add_peer() {
     uci set network.$name=interface
     uci set network.$name.proto=static
     uci set network.$name.ifname=eth0.$vlan
-    uci set network.$name.ipaddr=$(uci get gateway.@gateway[0].peer_ip)
-    uci set network.$name.ip6addr=$(uci get gateway.@gateway[0].peer_ip6)
+    # peer_ip
+    if uci get gateway.@gateway[0].peer_ip; then
+        uci set network.$name.ipaddr=$(uci get gateway.@gateway[0].peer_ip)
+    else if uci get gateway.@gateway[0].ipaddr; then
+        # use ipaddr (without subnet) if no peer_ip set
+        uci set network.$name.ipaddr=$(uci get gateway.@gateway[0].ipaddr | cut -d / -f1)
+    else
+        echo "FATAL: Neither peer_ip nor ipaddr set! No peering ipv4 set!"
+    fi
+    # peer_ip6
+    if uci get gateway.@gateway[0].peer_ip6; then
+        uci set network.$name.ip6addr=$(uci get gateway.@gateway[0].peer_ip6)
+    fi
 
     # add babel interface
     uci set babeld.$name=interface
