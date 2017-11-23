@@ -32,6 +32,37 @@ else
     echo "WARNING: No gateway name set!"
 fi
 
+# configure vlans
+add_vlan() {
+    local vlan="$1"
+    local ports=$(uci get gateway.$vlan.port)
+    local name=$SWITCHDEV_$vlan
+
+    uci set network.$name='switch_vlan'
+    uci set network.$name.device="$SWITCHDEV"
+    uci set network.$name.vlan="$vlan"
+    uci set network.$name.ports="$ports"
+}
+
+remove_vlan() {
+    local name="$1"
+
+    local switchdev=$(echo $name | cut -d_ -f1)
+    local vlan=$(echo $name | cut -d_ -f2)
+
+    # only remove vlans not present in gateway config
+    if ! uci get gateway.$vlan; then
+        # remove switch_vlan
+        uci del network.$name
+    fi
+}
+
+config lead network
+config_foreach remove_vlan switch_vlan
+
+config load gateway
+config_foreach add_vlan vlan
+
 #set ipaddr
 if uci get gateway.@gateway[0].ipaddr; then
     uci set network.mesh.ipaddr=$(uci get gateway.@gateway[0].ipaddr)
