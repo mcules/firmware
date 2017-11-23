@@ -246,8 +246,8 @@ add_peer() {
     uci set network.$name=interface
     uci set network.$name.proto=static
     uci set network.$name.ifname=eth0.$vlan
-    uci set network.$name.ipaddr=$(uci get gateway.@gateway[0].mesh_ip)
-    uci set network.$name.ip6addr=$(uci get gateway.@gateway[0].mesh_ip6)
+    uci set network.$name.ipaddr=$(uci get gateway.@gateway[0].peer_ip)
+    uci set network.$name.ip6addr=$(uci get gateway.@gateway[0].peer_ip6)
 
     # add babel interface
     uci set babeld.$name=interface
