@@ -23,7 +23,7 @@ BOARD="$(uci get board.model.name)"
 #load fff functions
 . /lib/functions/fff/wireless
 . /lib/functions/fff/network
-. /lib/fuctions/fff/keyxchange
+. /lib/functions/fff/keyxchange
 
 # ensure client config exists
 if ! uci get gateway.client; then
