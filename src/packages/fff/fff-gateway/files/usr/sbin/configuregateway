@@ -59,7 +59,7 @@ add_vlan() {
     local name="$SWITCHDEV"_$vlan
 
     uci set network.$name='switch_vlan'
-    uci set network.$name.device="$SWITCHDEV"
+    uci set network.$name.device="$(uci get network.$SWITCHDEV.name)"
     uci set network.$name.vlan="$vlan"
     uci set network.$name.ports="$CPUPORT $ports"
 }
@@ -114,13 +114,13 @@ else
 fi
 
 # dhcp
-uci del dhcp.mesh
+uci del dhcp.mesh.start
+uci del dhcp.mesh.limit
 if uci -q get gateway.@client[0].dhcp_start; then
     uci set dhcp.mesh=dhcp
     uci set dhcp.mesh.interface=mesh
     uci set dhcp.mesh.start=$(uci get gateway.@client[0].dhcp_start)
     uci set dhcp.mesh.limit=$(uci get gateway.@client[0].dhcp_limit)
-    uci set dhcp.mesh.leasetime='12h'
 else
     echo "WARNING: No DHCP range start and/or limit set!"
 fi
