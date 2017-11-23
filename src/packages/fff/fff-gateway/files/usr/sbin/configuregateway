@@ -32,9 +32,9 @@ else
     echo "WARNING: No gateway name set!"
 fi
 
-#set ip
-if uci get gateway.@gateway[0].ip; then
-    uci set network.mesh.ipaddr=$(uci get gateway.@gateway[0].ip)
+#set ipaddr
+if uci get gateway.@gateway[0].ipaddr; then
+    uci set network.mesh.ipaddr=$(uci get gateway.@gateway[0].ipaddr)
     uci set network.mesh.ip4table='fff'
     uci set network.mesh.ip6table='fff'
 else
