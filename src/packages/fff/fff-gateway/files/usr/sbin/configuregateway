@@ -71,7 +71,7 @@ remove_vlan() {
     local vlan=$(echo $name | cut -d_ -f2)
 
     # only remove vlans not present in gateway config
-    if ! uci get gateway.$vlan; then
+    if ! uci get gateway.$vlan >> /dev/null; then
         # remove switch_vlan
         uci del network.$name
     fi
@@ -138,7 +138,7 @@ fi
 
 
 
-#set dns-servers
+## dns
 uci delete dhcp.@dnsmasq[0].server
 if uci get gateway.@dns[0].server; then
     for f in $(uci get gateway.@dns[0].server); do
@@ -149,6 +149,7 @@ if uci get gateway.@dns[0].server; then
 else
     echo "WARNING: No DNS servers set!"
 fi
+
 
 
 ## HOODFILE
@@ -262,6 +263,8 @@ if [ -s "$hoodfilecopy" ]; then
 else
     echo "WARNING: No hoodfile!"
 fi
+
+
 
 ## BABEL CONFIG
 # remove peers missing in gateway config
