@@ -38,7 +38,7 @@ if uci get gateway.@gateway[0].ipaddr; then
     uci set network.mesh.ip4table='fff'
     uci set network.mesh.ip6table='fff'
 else
-    echo "WARNING: No ip and/or netmask set!"
+    echo "WARNING: No ipaddr set!"
 fi
 
 #set ip6addr
