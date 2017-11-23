@@ -107,13 +107,13 @@ else
     echo "WARNING: No client ip6addr set!"
 fi
 
-#set dhcp
+# dhcp
 uci del dhcp.mesh
-if uci get gateway.@dhcp[0].start && uci get gateway.@dhcp[0].limit; then
+if uci get gateway.@client[0].dhcp_start; then
     uci set dhcp.mesh=dhcp
     uci set dhcp.mesh.interface=mesh
-    uci set dhcp.mesh.start=$(uci get gateway.@dhcp[0].start)
-    uci set dhcp.mesh.limit=$(uci get gateway.@dhcp[0].limit)
+    uci set dhcp.mesh.start=$(uci get gateway.@client[0].dhcp_start)
+    uci set dhcp.mesh.limit=$(uci get gateway.@client[0].dhcp_limit)
     uci set dhcp.mesh.leasetime='12h'
 else
     echo "WARNING: No DHCP range start and/or limit set!"
