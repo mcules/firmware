@@ -279,9 +279,9 @@ fi
 
 
 
-## BABEL CONFIG
+## babelpeer
 # remove peers missing in gateway config
-remove_peer() {
+remove_babelpeer() {
     local name="$1"
     if ! echo $name | grep cfg > /dev/null; then # do not delete default interface
         if ! uci get gateway.$name; then
@@ -298,40 +298,45 @@ config_foreach remove_peer interface
 
 
 #add new peers
-add_peer() {
+add_babelpeer() {
     local name="$1"
     local vlan
     local type
 
+    # prohibit cfg* as name
     if echo $name | grep cfg > /dev/null; then
-        echo "ERROR: Invalid name for peer!"
+        echo "ERROR: name $name is invalid for babelpeer!"
         return
     fi
 
+    # prohibit using exisiting names
+    if uci get network.$name > /dev/null; then
+        echo "ERROR: name $name already in use!"
+        return
+    fi
+
+    # get iface
     if uci get gateway.$name.vlan; then
-        vlan=$(uci get gateway.$name.vlan)
+        iface="${SWITCHDEV}.$(uci get gateway.$name.vlan)"
+    elif uci get gateway.$name.iface; then
+        iface="$(uci get gateway.$name.iface)"
     else
-        echo "ERROR: No VLAN set for peer $name!"
+        echo "ERROR: No iface set for babelpeer $name!"
         return
     fi
 
+    # get type
     if uci get gateway.$name.type; then
         type=$(uci get gateway.$name.type)
     else
         type=wired
     fi
 
-    # add vlan
-    # VLAN's don't get removed if peer is removed!
-    uci set network.eth0_$vlan=switch_vlan
-    uci set network.eth0_$vlan.device=$(swconfig list | awk '{ print $4 }')
-    uci set network.eth0_$vlan.vlan=$vlan
-    uci set network.eth0_$vlan.ports="$BABEL_PORTS"
-
     # add interface
     uci set network.$name=interface
     uci set network.$name.proto=static
-    uci set network.$name.ifname=eth0.$vlan
+    uci set network.$name.ifname=$iface
+
     # peer_ip
     if uci get gateway.@gateway[0].peer_ip; then
         uci set network.$name.ipaddr=$(uci get gateway.@gateway[0].peer_ip)
@@ -341,6 +346,7 @@ add_peer() {
     else
         echo "FATAL: Neither peer_ip nor ipaddr set! No peering ipv4 set!"
     fi
+
     # peer_ip6
     if uci get gateway.@gateway[0].peer_ip6; then
         uci set network.$name.ip6addr=$(uci get gateway.@gateway[0].peer_ip6)
@@ -353,7 +359,7 @@ add_peer() {
 }
 
 config_load gateway
-config_foreach add_peer peer
+config_foreach add_peer babelpeer
 
 
 exit 0
