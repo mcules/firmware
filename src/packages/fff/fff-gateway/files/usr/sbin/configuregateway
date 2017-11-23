@@ -270,10 +270,4 @@ config_load gateway
 config_foreach add_peer peer
 
 
-
-uci commit
-
-/etc/init.d/network restart
-/etc/init.d/babeld restart
-
 exit 0
