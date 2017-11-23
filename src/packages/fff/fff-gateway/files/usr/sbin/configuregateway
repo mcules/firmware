@@ -23,7 +23,7 @@ BOARD="$(uci get board.model.name)"
 #load fff functions
 . /lib/functions/fff/wireless
 . /lib/functions/fff/network
-. /lib/fuctions/fff/keyxchange
+. /lib/functions/fff/keyxchange
 
 #set hostname
 if uci get gateway.@gateway[0].name; then
