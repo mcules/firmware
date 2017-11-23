@@ -49,13 +49,13 @@ fi
 
 add_vlan() {
     local vlan="$1"
-    local ports=$(uci get gateway.$vlan.port)
+    local ports=$(uci get gateway.$vlan.ports)
     local name="$SWITCHDEV"_$vlan
 
     uci set network.$name='switch_vlan'
     uci set network.$name.device="$SWITCHDEV"
     uci set network.$name.vlan="$vlan"
-    uci set network.$name.ports="$ports"
+    uci set network.$name.ports="$CPUPORT $ports"
 }
 
 remove_vlan() {
