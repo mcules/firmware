@@ -25,6 +25,12 @@ BOARD="$(uci get board.model.name)"
 . /lib/functions/fff/network
 . /lib/fuctions/fff/keyxchange
 
+# ensure client config exists
+if ! uci get gateway.client; then
+    echo "ERROR: No client config!"
+    exit 1
+fi
+
 #set hostname
 if uci get gateway.@gateway[0].name; then
     uci set system.@system[0].hostname=$(uci get gateway.@gateway[0].name)
@@ -63,20 +69,34 @@ config_foreach remove_vlan switch_vlan
 config load gateway
 config_foreach add_vlan vlan
 
-#set ipaddr
-if uci get gateway.@gateway[0].ipaddr; then
-    uci set network.mesh.ipaddr=$(uci get gateway.@gateway[0].ipaddr)
+
+
+## configure clientnet
+
+# ipaddr
+#remove old ipaddr
+uci del network.mesh.ipaddr
+#set new ipaddr
+if uci get gateway.@client[0].ipaddr; then
+    uci add_list network.mesh.ipaddr=$(uci get gateway.@client[0].ipaddr)
     uci set network.mesh.ip4table='fff'
     uci set network.mesh.ip6table='fff'
 else
-    echo "WARNING: No ipaddr set!"
+    echo "WARNING: No client ipaddr set!"
 fi
 
-#set ip6addr
-if uci get gateway.@gateway[0].ip6addr; then
-    uci add_list network.mesh.ip6addr=$(uci get gateway.@gateway[0].ip6addr)
+# ip6addr
+#remove old ip6addr
+for ip in $(uci get network.mesh.ip6addr); do
+    if ( echo "$ip" | grep -v -e "fd43:" -e "fdff:" ); then
+        uci del_list network.mesh.ip6addr="$ip"
+    fi
+done
+#set new ip6addr
+if uci get gateway.@client[0].ip6addr; then
+    uci add_list network.mesh.ip6addr=$(uci get gateway.@client[0].ip6addr)
 else
-    echo "WARNING: No ip6addr set!"
+    echo "WARNING: No client ip6addr set!"
 fi
 
 #set dhcp
@@ -120,13 +140,6 @@ if [ -s "$hoodfilecopy" ]; then
         addr="$(ipTidyColon "$addr")"
         addr_eui="$(ipEUIAssemble "$prefix" "br-mesh")"
         addr_eui="$(ipTidyColon "$addr_eui")"
-
-        # remove old ula addresses
-        for ip in $(uci get network.mesh.ip6addr); do
-            if ( echo "$ip" | grep -e "fd43:" ); then
-                uci del_list network.mesh.ip6addr="$ip"
-            fi
-        done
 
         # add new addresses
         if ! ( uci get network.mesh.ip6addr | grep -q "$addr" ) ; then
