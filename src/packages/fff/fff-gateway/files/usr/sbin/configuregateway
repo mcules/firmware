@@ -28,11 +28,17 @@ BOARD="$(uci get board.model.name)"
 
 
 # ensure client config exists
-if ! uci -q get gateway.@client[0]; then
+if ! uci get gateway.@client[0] >> /dev/null; then
     echo "ERROR: No client config!"
     exit 1
 fi
 
+
+echo "This script might remove existing vlans, interfaces, addresses, etc."
+read -r -p "Do you really want to continue? (y/n) " response
+if ! [ "$response" == "y" ] || [ "$response" == "Y" ]; then
+    exit 1
+fi
 
 
 ## set hostname
