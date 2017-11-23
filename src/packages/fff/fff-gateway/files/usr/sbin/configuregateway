@@ -28,7 +28,7 @@ BOARD="$(uci get board.model.name)"
 
 
 # ensure client config exists
-if ! uci get gateway.@client[0] >> /dev/null; then
+if ! uci -q get gateway.@client[0] > /dev/null; then
     echo "ERROR: No client config!"
     exit 1
 fi
@@ -43,7 +43,7 @@ fi
 
 ## set hostname
 
-if uci get gateway.@gateway[0].name; then
+if uci -q get gateway.@gateway[0].name; then
     uci set system.@system[0].hostname=$(uci get gateway.@gateway[0].name)
 else
     echo "WARNING: No gateway name set!"
@@ -71,7 +71,7 @@ remove_vlan() {
     local vlan=$(echo $name | cut -d_ -f2)
 
     # only remove vlans not present in gateway config
-    if ! uci get gateway.$vlan >> /dev/null; then
+    if ! uci -q get gateway.$vlan > /dev/null; then
         # remove switch_vlan
         uci del network.$name
     fi
@@ -91,7 +91,7 @@ config_foreach add_vlan vlan
 #remove old ipaddr
 uci del network.mesh.ipaddr
 #set new ipaddr
-if uci get gateway.@client[0].ipaddr; then
+if uci -q get gateway.@client[0].ipaddr; then
     uci add_list network.mesh.ipaddr=$(uci get gateway.@client[0].ipaddr)
     uci set network.mesh.ip4table='fff'
     uci set network.mesh.ip6table='fff'
@@ -107,7 +107,7 @@ for ip in $(uci get network.mesh.ip6addr); do
     fi
 done
 #set new ip6addr
-if uci get gateway.@client[0].ip6addr; then
+if uci -q get gateway.@client[0].ip6addr; then
     uci add_list network.mesh.ip6addr=$(uci get gateway.@client[0].ip6addr)
 else
     echo "WARNING: No client ip6addr set!"
@@ -115,7 +115,7 @@ fi
 
 # dhcp
 uci del dhcp.mesh
-if uci get gateway.@client[0].dhcp_start; then
+if uci -q get gateway.@client[0].dhcp_start; then
     uci set dhcp.mesh=dhcp
     uci set dhcp.mesh.interface=mesh
     uci set dhcp.mesh.start=$(uci get gateway.@client[0].dhcp_start)
@@ -128,9 +128,9 @@ fi
 # set interface
 #remove all eth interfaces
 ifaces=$(uci get network.mesh.ifname | sed -e "s/ *eth\d\.\d//g" -e "s/ *eth\d//g" -e "s/^ //")
-if uci get gateway.@client[0].vlan; then
+if uci -q get gateway.@client[0].vlan; then
     uci set network.mesh.ifname="${SWITCHDEV}.$(uci get gateway.@client[0].vlan) $ifaces"
-elif uci get gateway.@client[0].iface; then
+elif uci -q get gateway.@client[0].iface; then
     uci set network.mesh.ifname="$(uci get gateway.@client[0].iface) $ifaces"
 else
     echo "WARNING: No Interface for client specified"
@@ -140,7 +140,7 @@ fi
 
 ## dns
 uci delete dhcp.@dnsmasq[0].server
-if uci get gateway.@dns[0].server; then
+if uci -q get gateway.@dns[0].server; then
     for f in $(uci get gateway.@dns[0].server); do
         uci add_list dhcp.@dnsmasq[0].server=$f
         uci add_list dhcp.@dnsmasq[0].server="/in-addr.arpa/$f"
@@ -155,9 +155,9 @@ fi
 ## batman
 # set interface
 #remove all eth interfaces
-if uci get gateway.@batman[0].vlan; then
+if uci -q get gateway.@batman[0].vlan; then
     uci set network.ethmesh.ifname="${SWITCHDEV}.$(uci get gateway.@batman[0].vlan)"
-elif uci get gateway.@batman[0].iface; then
+elif uci -q get gateway.@batman[0].iface; then
     uci set network.ethmesh.ifname="$(uci get gateway.@batman[0].iface)"
 else
     echo "WARNING: No Interface for batman specified"
@@ -284,7 +284,7 @@ fi
 remove_babelpeer() {
     local name="$1"
     if ! echo $name | grep cfg > /dev/null; then # do not delete default interface
-        if ! uci get gateway.$name; then
+        if ! uci -q get gateway.$name > /dev/null; then
             # remove interface
             uci del network.$name
             # remove babel interface
@@ -294,7 +294,7 @@ remove_babelpeer() {
 }
 
 config_load babeld
-config_foreach remove_peer interface
+config_foreach remove_babelpeer interface
 
 
 #add new peers
@@ -310,15 +310,15 @@ add_babelpeer() {
     fi
 
     # prohibit using exisiting names
-    if uci get network.$name > /dev/null; then
+    if uci -q get network.$name > /dev/null; then
         echo "ERROR: name $name already in use!"
         return
     fi
 
     # get iface
-    if uci get gateway.$name.vlan; then
+    if uci -q get gateway.$name.vlan; then
         iface="${SWITCHDEV}.$(uci get gateway.$name.vlan)"
-    elif uci get gateway.$name.iface; then
+    elif uci -q get gateway.$name.iface; then
         iface="$(uci get gateway.$name.iface)"
     else
         echo "ERROR: No iface set for babelpeer $name!"
@@ -326,7 +326,7 @@ add_babelpeer() {
     fi
 
     # get type
-    if uci get gateway.$name.type; then
+    if uci -q get gateway.$name.type; then
         type=$(uci get gateway.$name.type)
     else
         type=wired
@@ -338,17 +338,17 @@ add_babelpeer() {
     uci set network.$name.ifname=$iface
 
     # peer_ip
-    if uci get gateway.@gateway[0].peer_ip; then
+    if uci -q get gateway.@gateway[0].peer_ip; then
         uci set network.$name.ipaddr=$(uci get gateway.@gateway[0].peer_ip)
-    else if uci get gateway.@gateway[0].ipaddr; then
+    elif uci -q get gateway.@client[0].ipaddr; then
         # use ipaddr (without subnet) if no peer_ip set
-        uci set network.$name.ipaddr=$(uci get gateway.@gateway[0].ipaddr | cut -d / -f1)
+        uci set network.$name.ipaddr=$(uci get gateway.@client[0].ipaddr | cut -d / -f1)
     else
         echo "FATAL: Neither peer_ip nor ipaddr set! No peering ipv4 set!"
     fi
 
     # peer_ip6
-    if uci get gateway.@gateway[0].peer_ip6; then
+    if uci -q get gateway.@gateway[0].peer_ip6; then
         uci set network.$name.ip6addr=$(uci get gateway.@gateway[0].peer_ip6)
     fi
 
@@ -359,7 +359,7 @@ add_babelpeer() {
 }
 
 config_load gateway
-config_foreach add_peer babelpeer
+config_foreach add_babelpeer babelpeer
 
 
 exit 0
