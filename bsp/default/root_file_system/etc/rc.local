@@ -7,7 +7,6 @@
 sleep 3
 
 /usr/sbin/configurehood
-/usr/sbin/configuregateway
 
 touch /tmp/started
 
