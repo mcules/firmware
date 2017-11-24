@@ -44,7 +44,7 @@ fi
 ## set hostname
 
 if uci -q get gateway.@gateway[0].name; then
-    uci set system.@system[0].hostname=$(uci get gateway.@gateway[0].name)
+    uci set fff.system.hostname=$(uci get gateway.@gateway[0].name)
 else
     echo "WARNING: No gateway name set!"
 fi
