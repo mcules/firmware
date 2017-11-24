@@ -309,12 +309,6 @@ add_babelpeer() {
         return
     fi
 
-    # prohibit using exisiting names
-    if uci -q get network.$name > /dev/null; then
-        echo "ERROR: name $name already in use!"
-        return
-    fi
-
     # get iface
     if uci -q get gateway.$name.vlan; then
         iface="${SWITCHDEV}.$(uci get gateway.$name.vlan)"
