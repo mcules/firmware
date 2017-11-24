@@ -10,5 +10,4 @@ cat > /etc/sysupgrade.conf <<-__EOF__
 /etc/network.config
 /etc/config/fff
 /etc/config/system
-/etc/config/gateway
 __EOF__
