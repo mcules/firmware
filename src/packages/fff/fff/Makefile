@@ -68,6 +68,8 @@ define Package/fff-layer3
              +@PACKAGE_grev6 \
              +fff-alfred-monitoring-proxy \
              +fff-batman-adv-server \
+             +kmod-wireguard \
+             +wireguard-tools \
              +iperf3 \
              +tcpdump
     VARIANT:=layer3
