@@ -381,11 +381,19 @@ add_wgpeer() {
     echo "WIREGUARD: publickey for ${name}: $(echo $(uci get gateway.$name.private_key) | wg pubkey)"
 
     # configure wireguard
-    cfg=$(uci add network wireguard_$name)
+    if uci -q get network.@wireguard_$name[0] > /dev/null
+    then
+        #config already exists
+        cfg="@wireguard_$name[0]"
+    else
+        #create new config
+        cfg=$(uci add network wireguard_$name)
+    fi
     uci set network.$cfg.public_key="$(uci get gateway.$name.public_key)"
     uci set network.$cfg.endpoint_host="$(uci get gateway.$name.endpoint_host)"
     uci set network.$cfg.endpoint_port="$(uci get gateway.$name.endpoint_port)"
     uci set network.$cfg.persistent_keepalive="$(uci get gateway.$name.persistent_keepalive)"
+    uci delete network.$cfg.allowed_ips
     uci add_list network.$cfg.allowed_ips='::/0'
     uci add_list network.$cfg.allowed_ips='0.0.0.0/0'
 
