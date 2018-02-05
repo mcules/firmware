@@ -50,6 +50,13 @@ else
 fi
 
 
+## set location
+
+if uci -q get gateway.@gateway[0].latitude && uci -q get gateway.@gateway[0].longitude; then
+    uci -q set fff.system.latitude='$(uci -q get gateway.@gateway[0].latitude)'
+    uci -q set fff.system.longitude='$(uci -q get gateway.@gateway[0].longitude)'
+fi
+
 
 ## configure vlans
 
@@ -258,19 +265,6 @@ if [ -s "$hoodfilecopy" ]; then
                 fi
             fi
         done
-    fi
-
-    # LOCATION
-    json_select "hood"
-    json_select "location"
-    json_get_var lat lat
-    json_get_var lon lon
-    json_select ".."
-    json_select ".."
-
-    if [ -n "$lat" ] && [ -n "$lon" ]; then
-        uci -q set "fff.system.latitude=$lat"
-        uci -q set "fff.system.longitude=$lon"
     fi
 else
     echo "WARNING: No hoodfile!"
