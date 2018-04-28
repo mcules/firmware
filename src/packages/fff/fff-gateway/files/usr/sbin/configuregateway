@@ -280,6 +280,9 @@ remove_babelpeer() {
         if ! uci -q get gateway.$name > /dev/null; then
             # remove interface
             uci del network.$name
+            # remove iif-rules
+            uci del network.${name}_rule
+            uci del network.${name}_rule6
             # remove babel interface
             uci del babeld.$name
             # remove wireguard config
@@ -324,6 +327,17 @@ add_babelpeer() {
     uci set network.$name=interface
     uci set network.$name.proto=static
     uci set network.$name.ifname=$iface
+
+    # add iif-rules
+    uci set network.${name}_rule=rule
+    uci set network.${name}_rule.in='$iface'
+    uci set network.${name}_rule.lookup='10'
+    uci set network.${name}_rule.priority='31'
+
+    uci set network.${name}_rule6=rule6
+    uci set network.${name}_rule6.in='$iface'
+    uci set network.${name}_rule6.lookup='10'
+    uci set network.${name}_rule6.priority='31'
 
     # peer_ip
     if uci -q get gateway.@gateway[0].peer_ip; then
@@ -396,6 +410,17 @@ add_wgpeer() {
 
     # link local
     uci add_list network.$name.addresses="$(ipEUIAssemble "fe80::/64" "$SWITCHDEV")"
+
+    # add iif-rules
+    uci set network.${name}_rule=rule
+    uci set network.${name}_rule.in='$iface'
+    uci set network.${name}_rule.lookup='10'
+    uci set network.${name}_rule.priority='31'
+
+    uci set network.${name}_rule6=rule6
+    uci set network.${name}_rule6.in='$iface'
+    uci set network.${name}_rule6.lookup='10'
+    uci set network.${name}_rule6.priority='31'
 
     # peer_ip
     if uci -q get gateway.@gateway[0].peer_ip; then
