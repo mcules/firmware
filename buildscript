@@ -285,7 +285,7 @@ cp_firmware() {
     [ -n "$subtarget" ] || subtarget="generic"
 
     for image in ${images[@]}; do
-        filename_build=${image//lede/${community}-${version}}
+        filename_build=${image//openwrt/${community}-${version}}
         filename_build=${filename_build//generic/g}
         cp "$target/bin/targets/${chipset}/${subtarget}/$image" "./bin/$filename_build"
 
