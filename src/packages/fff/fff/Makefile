@@ -19,8 +19,6 @@ define Package/fff/base
              +micrond \
              +fff-config \
              +fff-nodewatcher \
-             +fff-web \
-             +fff-batman-adv \
              +fff-support \
              +fff-network \
              +fff-sysupgrade \
@@ -39,7 +37,9 @@ define Package/fff-node
     DEPENDS+=+fff-fastd \
              +fff-firewall \
              +fff-vpn-select \
+	     +fff-batman-adv \
              +fff-uradvd \
+	     +fff-web \
              +fff-hoods
     VARIANT:=homenode
 endef
@@ -55,29 +55,16 @@ define Package/fff-layer3
              +fff-dhcp \
              +fff-odhcpd \
              +fff-babeld \
-             +fff-openvpn \
              +arptables \
-             +ebtables \
-             +ebtables-utils \
-             +kmod-ebtables-ipv4 \
-             +kmod-ebtables-ipv6 \
              +iptables-mod-filter \
              +iptables-mod-ipopt \
              +iptables-mod-conntrack-extra \
-             +kmod-ipt-nat \
              +gre \
              +@PACKAGE_grev4 \
              +@PACKAGE_grev6 \
              +fff-alfred-monitoring-proxy \
-             +fff-batman-adv-server \
-             +@FASTD_ENABLE_METHOD_NULL \
-             +@FASTD_ENABLE_CIPHER_NULL \
-             +@FASTD_WITH_STATUS_SOCKET \
-             +fastd \
              +kmod-wireguard \
-             +wireguard-tools \
-             +iperf3 \
-             +tcpdump
+             +wireguard-tools
     VARIANT:=layer3
 endef
 
