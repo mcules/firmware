@@ -388,6 +388,17 @@ configure() {
         fi
         echo "WIREGUARD: publickey for ${name}: $(echo $(uci get gateway.$name.private_key) | wg pubkey)"
 
+        # add iif-rules
+        uci set network.${name}_rule=rule
+        uci set network.${name}_rule.in="$name"
+        uci set network.${name}_rule.lookup='10'
+        uci set network.${name}_rule.priority='31'
+
+        uci set network.${name}_rule6=rule6
+        uci set network.${name}_rule6.in="$name"
+        uci set network.${name}_rule6.lookup='10'
+        uci set network.${name}_rule6.priority='31'
+
         # configure wireguard
         if uci -q get network.@wireguard_$name[0] > /dev/null
         then
