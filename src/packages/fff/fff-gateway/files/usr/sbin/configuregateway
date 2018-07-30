@@ -468,6 +468,7 @@ apply_changes() {
     echo "$(uci get "system.@system[0].hostname")" > /proc/sys/kernel/hostname
     /etc/init.d/network restart
     /etc/init.d/babeld restart
+    reload_config
 }
 
 
@@ -484,6 +485,7 @@ revert_changes() {
 test_changes() {
     /etc/init.d/network restart
     /etc/init.d/babeld restart
+    reload_config
     echo "services restarted. waiting up to 200s for SIGINT.."
 
     sleep 200
@@ -492,6 +494,7 @@ test_changes() {
     revert_changes
     /etc/init.d/network restart
     /etc/init.d/babeld restart
+    reload_config
 }
 
 
