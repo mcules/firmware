@@ -185,9 +185,10 @@ configure() {
         # Set $prefix::MAC as IP
         if [ -n "$prefix" ] ; then
             prefix="$(echo "$prefix" | sed -e 's,\\,,')"
-            addr="$(ipMacAssemble "$prefix" "br-mesh")"
+            mac="$(cat "/sys/class/net/br-mesh/address")"
+            addr="$(ipMacAssemble "$prefix" "$mac")"
             addr="$(ipTidyColon "$addr")"
-            addr_eui="$(ipEUIAssemble "$prefix" "br-mesh")"
+            addr_eui="$(ipEUIAssemble "$prefix" "$mac")"
             addr_eui="$(ipTidyColon "$addr_eui")"
 
             # add new addresses
