@@ -56,6 +56,7 @@ define Package/fff-layer3
              +fff-odhcpd \
              +fff-babeld \
              +fff-openvpn \
+             +fff-macnock \
              +arptables \
              +ebtables \
              +ebtables-utils \
