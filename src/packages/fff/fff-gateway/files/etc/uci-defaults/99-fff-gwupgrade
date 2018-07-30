@@ -3,5 +3,5 @@
 
 cat >> /etc/sysupgrade.conf <<-__EOF__
 /etc/config/gateway
-/www/hood/keyxchangev2data
+/etc/hoodfile
 __EOF__

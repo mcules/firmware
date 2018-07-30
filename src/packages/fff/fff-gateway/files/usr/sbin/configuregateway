@@ -174,8 +174,9 @@ configure() {
 
 
     ## HOODFILE
-    if [ -s "$hoodfilecopy" ]; then
-        json_load "$(cat "$hoodfilecopy")"
+    if [ -s /etc/hoodfile ]; then
+        cp /etc/hoodfile /www/hood/keyxchangev2data
+        json_load "$(cat /etc/hoodfile)"
 
         # ULA
         json_select network
