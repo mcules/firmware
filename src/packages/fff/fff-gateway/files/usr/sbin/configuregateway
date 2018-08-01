@@ -422,7 +422,8 @@ configure() {
         uci -q del network.$name.addresses
 
         # link local
-        uci add_list network.$name.addresses="$(ipEUIAssemble "fe80::/64" "$SWITCHDEV")"
+        mac="$(cat "/sys/class/net/$SWITCHDEV/address")"
+        uci add_list network.$name.addresses="$(ipEUIAssemble "fe80::/64" "$mac")"
 
         # add iif-rules
         uci set network.${name}_rule=rule
